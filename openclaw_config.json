@@ -1,0 +1,257 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.2.17",
+    "lastTouchedAt": "2026-02-17T12:30:00.000Z"
+  },
+  "env": {
+    "vars": {
+      "GEMINI_API_KEY": "__OPENCLAW_REDACTED__",
+      "OPENROUTER_API_KEY": "__OPENCLAW_REDACTED__"
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-02-11T04:20:51.175Z",
+    "lastRunVersion": "2026.2.9",
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "browser": {
+    "headless": true,
+    "noSandbox": true,
+    "defaultProfile": "openclaw"
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "openrouter": {
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "apiKey": "__OPENCLAW_REDACTED__",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "anthropic/claude-opus-4.6",
+            "name": "Claude Opus 4.6",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 5.0,
+              "output": 25.0,
+              "cacheRead": 0.5,
+              "cacheWrite": 6.0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "google/gemini-3-pro-preview",
+            "name": "Gemini 3 Pro Preview",
+            "reasoning": true,
+            "input": [
+              "text",
+              "image",
+              "audio",
+              "video"
+            ],
+            "cost": {
+              "input": 2.0,
+              "output": 12.0
+            },
+            "contextWindow": 1000000,
+            "maxTokens": 65535
+          },
+          {
+            "id": "moonshotai/kimi-k2.5",
+            "name": "Kimi K2.5 Thinking",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.45,
+              "output": 2.25
+            },
+            "contextWindow": 256000,
+            "maxTokens": 24000
+          },
+          {
+            "id": "minimax/minimax-m2.1",
+            "name": "MiniMax M2.1",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.3,
+              "output": 1.2
+            },
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "google/nano-banana-pro",
+            "name": "Google Nano Banana Pro",
+            "reasoning": false,
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0.05,
+              "output": 0.05
+            },
+            "contextWindow": 32000,
+            "maxTokens": 4096
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "anthropic/claude-opus-4.6",
+        "fallbacks": [
+          "moonshotai/kimi-k2.5",
+          "minimax/minimax-m2.1",
+          "openai/gpt-5.3-codex-spark",
+          "openai/gpt-5.2-codex",
+          "google/nano-banana-pro"
+        ]
+      },
+      "models": {
+        "anthropic/claude-opus-4.6": {
+          "alias": "Manager",
+          "params": {
+            "temperature": 0.7,
+            "thinking": "high"
+          }
+        },
+        "moonshotai/kimi-k2.5": {
+          "alias": "Architect",
+          "params": {
+            "thinking": "high",
+            "reasoning_effort": "high"
+          }
+        },
+        "minimax/minimax-m2.1": {
+          "alias": "Coder"
+        },
+        "openai/gpt-5.3-codex-spark": {
+          "alias": "Fast Coder"
+        },
+        "openai/gpt-5.2-codex": {
+          "alias": "Deep Coder"
+        },
+        "google/nano-banana-pro": {
+          "alias": "Imager"
+        }
+      },
+      "workspace": "/data/.openclaw/workspace",
+      "contextTokens": 150000,
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8,
+        "model": {
+          "primary": "minimax/minimax-m2.1",
+          "fallbacks": [
+            "moonshotai/kimi-k2.5",
+            "openai/gpt-5.3-codex-spark"
+          ]
+        },
+        "thinking": "high"
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "identity": {
+          "name": "Claw (Manager)",
+          "theme": "Orchestrator",
+          "emoji": "🦞"
+        },
+        "systemPromptPath": "openclaw_prompt.md"
+      },
+      {
+        "id": "architect-agent",
+        "name": "Kimi-Architect",
+        "model": "moonshotai/kimi-k2.5",
+        "identity": {
+          "name": "Systems Architect",
+          "theme": "Reasoning & Design",
+          "emoji": "📐"
+        }
+      },
+      {
+        "id": "coding-agent",
+        "name": "MiniMax-Coder",
+        "model": "minimax/minimax-m2.1",
+        "identity": {
+          "name": "Code Factory",
+          "theme": "High-Volume Implementation",
+          "emoji": "💻"
+        }
+      },
+      {
+        "id": "legacy-agent",
+        "name": "GPT-Legacy-Refactor",
+        "model": "openai/gpt-5.2-codex",
+        "identity": {
+          "name": "The Seneschal",
+          "theme": "Legacy Systems",
+          "emoji": "📜"
+        }
+      },
+      {
+        "id": "imager-agent",
+        "name": "Banana-Imager",
+        "model": "google/nano-banana-pro",
+        "identity": {
+          "name": "Visual Artist",
+          "theme": "Image Generation",
+          "emoji": "🍌"
+        }
+      }
+    ]
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "perplexity",
+        "perplexity": {
+          "apiKey": "__OPENCLAW_REDACTED__",
+          "model": "perplexity/sonar-pro-search"
+        }
+      },
+      "deep research": {
+        "enabled": true,
+        "provider": "perplexity",
+        "perplexity": {
+          "apiKey": "__OPENCLAW_REDACTED__",
+          "model": "perplexity/sonar-deep-research"
+        }
+      }
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "__OPENCLAW_REDACTED__"
+    },
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
+    }
+  }
+}

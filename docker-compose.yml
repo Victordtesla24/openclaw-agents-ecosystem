@@ -1,0 +1,97 @@
+# =============================================================================
+# OpenClaw Docker Compose — Production Configuration
+# Implementation Plan §2.3: Container Deployment
+#
+# Deploys the OpenClaw agent container with:
+#   - Environment variable passthrough from .env
+#   - Workspace volume persistence at /data/.openclaw/workspace
+#   - Gateway port bound to loopback only (127.0.0.1:41422)
+#   - Health check configuration
+#   - Restart policy (unless-stopped)
+#
+# Usage:
+#   docker-compose up -d
+#   docker-compose down
+#   docker-compose logs -f openclaw
+# =============================================================================
+
+services:
+  openclaw:
+    image: ghcr.io/hostinger/hvps-openclaw:latest
+    container_name: openclaw
+    hostname: openclaw-agent
+    restart: unless-stopped
+
+    # --- Environment Variables (from .env) ---
+    env_file:
+      - .env
+
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - OPENCLAW_WORKSPACE=/data/.openclaw/workspace
+
+    # --- Port Mapping ---
+    # Gateway port bound to loopback ONLY (security hardening)
+    # Per MEMORY.md: "Was bound to 0.0.0.0 by default. Changed to 127.0.0.1."
+    ports:
+      - "127.0.0.1:41422:41422"
+
+    # --- Volumes ---
+    volumes:
+      # Persistent workspace for agent artifacts
+      - openclaw-workspace:/data/.openclaw/workspace
+      # Mount Homebrew for package management (container-specific)
+      - openclaw-linuxbrew:/home/linuxbrew
+      # Mount the project configuration (read-only)
+      - ./openclaw_config.json:/data/.openclaw/config/openclaw_config.json:ro
+      - ./openclaw_prompt.md:/data/.openclaw/config/openclaw_prompt.md:ro
+      - ./skills_matrix.md:/data/.openclaw/config/skills_matrix.md:ro
+      - ./Agent_main:/data/.openclaw/config/Agent_main:ro
+
+    # --- Health Check ---
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:41422/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+    # --- Resource Limits ---
+    # Per TOOLS.md: 2 vCores, 8 GB RAM
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 7G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+
+    # --- Security ---
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+
+    # --- Logging ---
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+    # --- Networking ---
+    networks:
+      - openclaw-net
+
+# --- Named Volumes ---
+volumes:
+  openclaw-workspace:
+    driver: local
+  openclaw-linuxbrew:
+    driver: local
+
+# --- Networks ---
+networks:
+  openclaw-net:
+    driver: bridge

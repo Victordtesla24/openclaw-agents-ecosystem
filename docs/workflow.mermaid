@@ -1,0 +1,40 @@
+flowchart TD
+    %% Roles
+    Manager[**Manager / Orchestrator**<br/>Claude Opus 4.6 Thinking AI]
+    Architect[**Architectural & Reasoning**<br/>Kimi-K2.5-Thinking-Agent]
+    Coder[**Code Generation**<br/>MiniMax-Coding-Agent]
+    Imager[**Image Generation**<br/>Banana-Imager-Agent]
+    Verification{**Gatekeeper Verification**<br/>Pass/Fail?}
+    User((**User**))
+
+    %% Step 1: Ingest & Decompose
+    User -->|User Prompt| Manager
+    Manager -->|Decompose to Atomic Tasks| Deployment[Task Allocation]
+
+    %% Step 2: Delegation (Smart Routing)
+    Deployment -- "Architectural / Reasoning" --> Architect
+    Deployment -- "Code Generation" --> Coder
+    Deployment -- "Image Generation" --> Imager
+
+    %% Step 3: Execution
+    Architect -->|Execute Commands| VPS[Hostinger VPS / Docker]
+    Coder -->|Execute Commands| VPS
+    Imager -->|Generate Images| Artifacts[Output Artifacts]
+    VPS -->|Generate Artifacts| Artifacts
+
+    %% Step 4: QA & Verification Loop (Realtime)
+    Artifacts -->|Step A: Ingest Artifacts| Manager
+    Manager -->|Step B: Line-by-Line Audit| Verification
+
+    %% Step 5: Branch Logic
+    Verification -- "Criteria Met == TRUE" --> Delivery[Package & Release]
+    Verification -- "Criteria Met == FALSE" --> Correction[Generate Correction Instructions]
+    
+    Correction -->|Re-delegate| Deployment
+    Delivery -->|Final Presentation| User
+
+    %% Styling
+    style Manager fill:#f9f,stroke:#333,stroke-width:4px
+    style Architect fill:#bbf,stroke:#333
+    style Coder fill:#bfb,stroke:#333
+    style Verification fill:#ff9,stroke:#f00,stroke-width:2px,shape:diamond

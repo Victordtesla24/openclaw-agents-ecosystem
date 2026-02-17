@@ -1,0 +1,43 @@
+graph TB
+    subgraph "Hostinger VPS (Ubuntu 25.10)"
+        subgraph "Docker Container: OpenClaw"
+            Manager[**OpenClaw Manager**<br/>Claude Opus 4.6]
+            
+            subgraph "Sub-Agents"
+                Reasoning[**Reasoning Agent**<br/>Gemini 3 Pro]
+                Coder[**Coding Agent**<br/>MiniMax M2.1]
+                Creative[**Creative Agent**<br/>Kimi K2.5]
+            end
+            
+            Gateway[**API Gateway**<br/>Port 41422]
+            Filesystem[**Workspace**<br/>/data/.openclaw/workspace]
+            
+            Manager -->|Spawns| Reasoning
+            Manager -->|Spawns| Coder
+            Manager -->|Spawns| Creative
+            
+            Manager -->|Control| Gateway
+            Manager -->|R/W| Filesystem
+            GrayArea[**Tools**<br/>rclone, netlify, go, brew]
+            Manager -->|Exec| GrayArea
+        end
+        
+        DockerEngine[**Docker Engine**]
+        DockerEngine -->|Hosts| Manager
+        
+        HostFS[**Host Filesystem**<br/>/docker/openclaw-ef1u/data]
+        HostFS -.->|Mounts| Filesystem
+    end
+    
+    subgraph "External"
+        OpenRouter[**OpenRouter API**]
+        GoogleDrive[**Google Drive API**]
+        Netlify[**Netlify API**]
+        UserMachine[**User Mac**]
+    end
+    
+    Gateway -->|Outbound| OpenRouter
+    Gateway -->|Outbound| GoogleDrive
+    Gateway -->|Outbound| Netlify
+    
+    UserMachine -->|SSH Tunnel| Gateway
